@@ -75,18 +75,46 @@ export const addProduct = async (
 
 // @desc         UPDATE PRODUCT single PRODUCT
 //@ route  PUT /api/v1/products/:id
-export const updateProduct = ({ response }: { response: any }) => {
-  response.body = {
-    success: true,
-    data: "update",
-  };
-};
+export const updateProduct = async (
+  { params, request, response }: {
+    params: { id: string };
+    request: any;
+    response: any;
+  },
+) => {
+  const product: Product | undefined = products.find((p) => p.id === params.id);
 
+  if (product) {
+    const body = await request.body();
+
+    const updateData: { name?: string; description?: string; price?: number } =
+      body.value;
+
+    products = products.map((p) =>
+      p.id === params.id ? { ...p, ...updateData } : p
+    );
+
+    response.status = 200;
+    response.body = {
+      success: true,
+      data: products,
+    };
+  } else {
+    response.status = 404;
+    response.body = {
+      success: false,
+      msg: "No product found",
+    };
+  }
+};
 // @desc         DELETE PRODUCT single PRODUCT
 //@ route  DELETE /api/v1/products/:id
-export const deleteProduct = ({ response }: { response: any }) => {
+export const deleteProduct = (
+  { params, response }: { params: { id: string }; response: any },
+) => {
+  products = products.filter((p) => p.id !== params.id);
   response.body = {
     success: true,
-    data: "delete",
+    msg: "Product removed",
   };
 };
